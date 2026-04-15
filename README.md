@@ -17,7 +17,7 @@ tashafy/
 
 ## Tech Stack
 
-- **Backend**: Laravel 12 (PHP 8.2+)
+- **Backend**: Laravel 12 (PHP 8.4+)
 - **Admin Panel**: Vue 3 + Element Plus + Vue Router + Pinia + Vue I18n
 - **Public Website**: Next.js
 - **Database**: MySQL/PostgreSQL
@@ -53,7 +53,7 @@ More docker details: `docs/DOCKER_SETUP.md`
 
 ### Prerequisites
 
-- PHP 8.2+
+- PHP 8.4+
 - Composer
 - Node 18+
 - MySQL/PostgreSQL
