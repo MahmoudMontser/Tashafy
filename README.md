@@ -9,7 +9,8 @@ tashafy/
 ├── apps/
 │   ├── api/          # Laravel API (admin + public)
 │   ├── admin/        # Vue 3 Admin panel
-│   └── web/          # Nuxt 3 Public website
+│   ├── frontend/     # Next.js Public website
+│   └── web/          # Legacy Nuxt app (not primary)
 └── docs/
     └── IMPLEMENTATION.md
 ```
@@ -18,11 +19,37 @@ tashafy/
 
 - **Backend**: Laravel 12 (PHP 8.2+)
 - **Admin Panel**: Vue 3 + Element Plus + Vue Router + Pinia + Vue I18n
-- **Public Website**: Nuxt 3 + @nuxtjs/i18n
+- **Public Website**: Next.js
 - **Database**: MySQL/PostgreSQL
 - **Authentication**: Laravel Sanctum
 
-## Quick Start
+## Quick Start (Docker - Recommended)
+
+Run the full stack (API + Admin + Frontend + MySQL) with one command:
+
+```bash
+cp .env.docker.example .env.docker
+docker compose --env-file .env.docker up -d --build
+```
+
+Open:
+
+- API: http://localhost:8000
+- Admin: http://localhost:5173
+- Frontend: http://localhost:3000
+- API Docs: http://localhost:8000/api-docs
+- Frontend API Docs: http://localhost:8000/api-docs/frontend
+- System Docs (Architecture + Infra + ERD): http://localhost:8000/system-docs
+
+Stop:
+
+```bash
+docker compose --env-file .env.docker down
+```
+
+More docker details: `docs/DOCKER_SETUP.md`
+
+## Quick Start (Manual Local)
 
 ### Prerequisites
 
@@ -76,10 +103,10 @@ Default credentials:
 - Email: `admin@tashafy.com`
 - Password: `Password123!`
 
-### 4. Public Website (Nuxt 3)
+### 4. Public Website (Next.js)
 
 ```bash
-cd apps/web
+cd apps/frontend
 npm install
 npm run dev -- --port 3000
 ```
@@ -119,10 +146,15 @@ Visit: http://localhost:3000
 - `PUT /api/admin/providers/{id}` - Update provider
 - `DELETE /api/admin/providers/{id}` - Delete provider
 
-### Public (Coming Soon)
+### Public Website
 
-- `GET /api/public/providers?lang=ar&type=...`
-- `GET /api/public/providers/{slug}?lang=en`
+- `GET /api/public/content/page/{key}`
+- `GET /api/public/content/navigation`
+- `GET /api/public/content/setting/{key}`
+- `GET /api/public/blog`
+- `GET /api/public/blog/{slug}`
+- `GET /api/public/providers/{slug}`
+- `POST /api/public/reservation-attempts`
 
 ## Development
 
@@ -136,7 +168,7 @@ cd apps/api && php artisan serve --port=8000
 cd apps/admin && npm run dev -- --port 5173
 
 # Terminal 3: Website
-cd apps/web && npm run dev -- --port 3000
+cd apps/frontend && npm run dev -- --port 3000
 ```
 
 ## Translation Convention
