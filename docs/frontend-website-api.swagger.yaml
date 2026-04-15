@@ -1,0 +1,781 @@
+openapi: 3.0.3
+info:
+  title: Tashafy Frontend Website Public API
+  version: 1.0.0
+  description: |
+    Public APIs consumed by the website frontend (Next.js).
+    Base path is `/api/public`.
+servers:
+  - url: http://localhost:8000/api/public
+    description: Local development
+
+tags:
+  - name: Public Content
+  - name: Blog
+  - name: Providers
+  - name: Reservations
+
+paths:
+  /content/page/{key}:
+    get:
+      tags: [Public Content]
+      summary: Get published CMS page by key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+          example: home
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+            enum: [ar, en]
+            default: ar
+      responses:
+        '200':
+          description: Page found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /content/navigation:
+    get:
+      tags: [Public Content]
+      summary: Get navigation items
+      parameters:
+        - in: query
+          name: group
+          required: false
+          schema:
+            type: string
+            maxLength: 60
+            default: header
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+            enum: [ar, en]
+            default: ar
+      responses:
+        '200':
+          description: Navigation returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicNavigationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /content/setting/{key}:
+    get:
+      tags: [Public Content]
+      summary: Get public setting value
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+          example: app.frontend
+      responses:
+        '200':
+          description: Setting value returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSettingResponse'
+
+  /blog:
+    get:
+      tags: [Blog]
+      summary: Get published blog list
+      parameters:
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+            enum: [ar, en]
+            default: ar
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 12
+      responses:
+        '200':
+          description: Blog list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicBlogListResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /blog/{slug}:
+    get:
+      tags: [Blog]
+      summary: Get published blog detail by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          example: wellness-trends-2026
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+            enum: [ar, en]
+            default: ar
+      responses:
+        '200':
+          description: Blog detail returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicBlogDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /providers/{slug}:
+    get:
+      tags: [Providers]
+      summary: Get provider detail by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          example: my-provider
+        - in: query
+          name: lang
+          required: false
+          schema:
+            type: string
+            enum: [ar, en]
+            default: ar
+      responses:
+        '200':
+          description: Provider detail returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProviderDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /reservation-attempts:
+    post:
+      tags: [Reservations]
+      summary: Log reservation attempt and prepare WhatsApp URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationAttemptStoreRequest'
+            example:
+              provider_id: 1
+              provider_package_id: 10
+              source: frontend.rehab.package.card
+              locale: ar
+              reservation_type: package
+              item_name: Premium Recovery Program
+              provider_name: XYZ Center
+              customer_name: null
+              customer_phone: null
+              message: null
+              whatsapp_number: null
+              metadata:
+                campaign: spring-2026
+      responses:
+        '201':
+          description: Reservation attempt created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicReservationAttemptStoreResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+components:
+  responses:
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LaravelValidationError'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LaravelNotFoundError'
+
+  schemas:
+    LanguageMap:
+      type: object
+      nullable: true
+      properties:
+        ar:
+          type: string
+          nullable: true
+        en:
+          type: string
+          nullable: true
+
+    LaravelValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    LaravelNotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: No query results for model.
+
+    PublicPageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            page:
+              type: object
+              nullable: true
+              properties:
+                key:
+                  type: string
+                slug:
+                  type: string
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+                sections:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      sort_order:
+                        type: integer
+                      content:
+                        type: object
+                        nullable: true
+                        additionalProperties: true
+
+    PublicNavigationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            group:
+              type: string
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  label:
+                    type: string
+                    nullable: true
+                  path:
+                    type: string
+                    nullable: true
+                  sort_order:
+                    type: integer
+
+    PublicSettingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            key:
+              type: string
+            value:
+              nullable: true
+              oneOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - type: object
+                  additionalProperties: true
+                - type: array
+                  items: {}
+
+    BlogPostListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+          nullable: true
+        excerpt:
+          type: string
+          nullable: true
+        category:
+          type: string
+          nullable: true
+        cover_image:
+          type: string
+          nullable: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    PublicBlogListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlogPostListItem'
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            current_page:
+              type: integer
+            last_page:
+              type: integer
+
+    BlogPostDetail:
+      allOf:
+        - $ref: '#/components/schemas/BlogPostListItem'
+        - type: object
+          properties:
+            body:
+              type: string
+              nullable: true
+
+    PublicBlogDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            post:
+              $ref: '#/components/schemas/BlogPostDetail'
+            related:
+              type: array
+              items:
+                $ref: '#/components/schemas/BlogPostListItem'
+
+    ProviderPackageItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        label:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+
+    ProviderPackage:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        duration_label:
+          type: string
+          nullable: true
+        sessions_count:
+          type: integer
+          nullable: true
+        is_highlighted:
+          type: boolean
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderPackageItem'
+
+    ProviderReservationOption:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        base_price:
+          type: number
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        cta_type:
+          type: string
+          nullable: true
+        cta_target:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+
+    ProviderMedia:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+        alt:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+
+    ProviderFacility:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        icon:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+
+    ProviderDoctor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        specialization:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+        experience_years:
+          type: integer
+          nullable: true
+        sort_order:
+          type: integer
+
+    ProviderTestimonial:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        role:
+          type: string
+          nullable: true
+        quote:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          nullable: true
+        rating:
+          type: integer
+          nullable: true
+        is_featured:
+          type: boolean
+        sort_order:
+          type: integer
+
+    ProviderDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+          nullable: true
+        short_description:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        price_from:
+          type: number
+          nullable: true
+        currency:
+          type: string
+          nullable: true
+        rating_avg:
+          type: number
+          nullable: true
+        rating_count:
+          type: integer
+          nullable: true
+        is_featured:
+          type: boolean
+        packages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderPackage'
+        reservation_options:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderReservationOption'
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderMedia'
+        facilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderFacility'
+        doctors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderDoctor'
+        testimonials:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderTestimonial'
+
+    PublicProviderDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            provider:
+              $ref: '#/components/schemas/ProviderDetail'
+
+    ReservationAttemptStoreRequest:
+      type: object
+      properties:
+        provider_id:
+          type: integer
+          nullable: true
+        provider_package_id:
+          type: integer
+          nullable: true
+        source:
+          type: string
+          nullable: true
+          maxLength: 120
+        locale:
+          type: string
+          nullable: true
+          maxLength: 10
+        reservation_type:
+          type: string
+          nullable: true
+          maxLength: 30
+        item_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        provider_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        customer_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        customer_phone:
+          type: string
+          nullable: true
+          maxLength: 40
+        message:
+          type: string
+          nullable: true
+        whatsapp_number:
+          type: string
+          nullable: true
+          maxLength: 30
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+
+    ReservationAttempt:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider_id:
+          type: integer
+          nullable: true
+        provider_package_id:
+          type: integer
+          nullable: true
+        source:
+          type: string
+        locale:
+          type: string
+          nullable: true
+        reservation_type:
+          type: string
+        item_name:
+          type: string
+          nullable: true
+        provider_name:
+          type: string
+          nullable: true
+        status:
+          type: string
+        customer_name:
+          type: string
+          nullable: true
+        customer_phone:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        whatsapp_number:
+          type: string
+          nullable: true
+        whatsapp_url:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+        provider:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            slug:
+              type: string
+              nullable: true
+            name:
+              $ref: '#/components/schemas/LanguageMap'
+        package:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            provider_id:
+              type: integer
+            name:
+              $ref: '#/components/schemas/LanguageMap'
+            price:
+              type: number
+              nullable: true
+            currency:
+              type: string
+              nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    PublicReservationAttemptStoreResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            attempt:
+              $ref: '#/components/schemas/ReservationAttempt'
+            whatsapp_url:
+              type: string
+              nullable: true

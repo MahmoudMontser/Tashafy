@@ -1,0 +1,22 @@
+.DS_Store
+
+# Node
+node_modules/
+dist/
+.next/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Laravel
+apps/api/vendor/
+apps/api/storage/logs/
+apps/api/storage/framework/cache/
+apps/api/storage/framework/sessions/
+apps/api/storage/framework/views/
+
+# IDE
+.idea/
+.vscode/

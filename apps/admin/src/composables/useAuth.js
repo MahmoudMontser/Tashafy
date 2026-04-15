@@ -1,0 +1,45 @@
+const TOKEN_KEY = 'admin_token'
+const USER_KEY = 'admin_user'
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY)
+}
+
+export function setSession(token, user = null) {
+  localStorage.setItem(TOKEN_KEY, token)
+  if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
+export function clearSession() {
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USER_KEY)
+}
+
+export function setCurrentUser(user) {
+  if (!user) {
+    localStorage.removeItem(USER_KEY)
+    return
+  }
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
+export function getCurrentUser() {
+  const raw = localStorage.getItem(USER_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+export function hasPermission(permission) {
+  const user = getCurrentUser()
+  const permissions = Array.isArray(user?.permissions) ? user.permissions : []
+  return permissions.includes(permission)
+}
+
+export function hasAnyPermission(required = []) {
+  if (!required?.length) return true
+  return required.some((permission) => hasPermission(permission))
+}
