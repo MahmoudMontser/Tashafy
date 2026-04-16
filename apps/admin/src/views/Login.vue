@@ -22,10 +22,16 @@
           <el-form @submit.prevent="submit" label-position="top" class="login-form">
             <el-form-item :label="$t('email')">
               <el-input
+                id="admin-login-email"
                 v-model="email"
                 class="login-input"
                 size="large"
+                type="email"
+                name="email"
+                inputmode="email"
                 autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
                 :placeholder="$t('loginEmailPlaceholder')"
               >
                 <template #prefix>
@@ -36,6 +42,7 @@
 
             <el-form-item :label="$t('password')">
               <el-input
+                id="admin-login-password"
                 v-model="password"
                 class="login-input"
                 type="password"

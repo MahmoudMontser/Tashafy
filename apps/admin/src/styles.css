@@ -310,13 +310,19 @@ body {
 
 .login-shell {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
+  align-content: center;
   background:
     radial-gradient(circle at 12% 18%, rgba(147, 197, 253, 0.55) 0%, rgba(147, 197, 253, 0) 42%),
     radial-gradient(circle at 86% 82%, rgba(196, 181, 253, 0.45) 0%, rgba(196, 181, 253, 0) 38%),
     linear-gradient(140deg, #0f1f46 0%, #1e3a8a 45%, #2563eb 100%);
   padding: 24px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .login-card {
@@ -465,8 +471,10 @@ body {
 }
 
 .login-form .el-input__inner {
-  font-size: 15px;
+  /* 16px avoids iOS zoom-on-focus and improves readability on phones */
+  font-size: 16px;
   color: #0f172a;
+  min-width: 0;
 }
 
 .login-form .el-input__inner::placeholder {
@@ -529,13 +537,23 @@ body {
     min-height: 0;
   }
 
+  /* Put the sign-in form first on small screens so email/password are visible without scrolling past the hero */
+  .login-form-area {
+    order: -1;
+  }
+
+  .login-hero {
+    order: 1;
+    gap: 10px;
+  }
+
   .login-hero,
   .login-form-area {
     padding: 24px 20px;
   }
 
-  .login-hero {
-    gap: 10px;
+  .login-card {
+    width: min(980px, 100%);
   }
 }
 
