@@ -13,9 +13,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --no-progress
+# Skip scripts: post-autoload-dump runs `artisan package:discover` but `artisan` is not copied yet.
+RUN composer install --no-interaction --prefer-dist --no-progress --no-scripts
 
 COPY . .
+
+RUN composer dump-autoload --optimize --no-interaction --no-scripts \
+    && php artisan package:discover --ansi
 
 RUN chmod +x /var/www/html/docker-entrypoint.sh
 
